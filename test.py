@@ -39,7 +39,6 @@ import time
 import math
 import os
 import rospy
-import statistics
 from dynamixel_sdk import *
 from dynamixel_sdk_examples.srv import *
 from dynamixel_sdk_examples.msg import *
@@ -68,12 +67,13 @@ else:
     def get_angle(num):
         return (num * 180) / math.pi
 
+
     def scan_callback(data):
             range_center = data.ranges[len(data.ranges)/2] # angle 0
             range_right = data.ranges[len(data.ranges)/4] # angle -3.14/2
             range_left = data.ranges[3 * (len(data.ranges)/4)] # angle 3.14/2
             range_behind = data.ranges[0]   # angle -3.14
-            print "center- %0.1f" %range_center," behind - %0.1f" %range_behind, " left - %0.1f" %range_left, " right - %0.1f" %range_right
+            print("center- %0.1f" %range_center," behind - %0.1f" %range_behind, " left - %0.1f" %range_left, " right - %0.1f" %range_right)
             
             scan_count = ((data.scan_time // data.time_increment)) // 2
             min_angle_index = len(data.ranges)/4
@@ -82,26 +82,26 @@ else:
             
             debounce = 0 # Counter for if lidar picks up a value outside OUTER_RANGE_RADIUS while scanning box 
             box = [] # Array containing distances/angles lidar pick up of a single box
-            #boxDone = 0 # Just a boolean to force lidar to stop scanning box (this was suppose to stop lidar)
             
             # Fails if >= 2 boxes are overlapped in view of the lidar
             for i in range(int(scan_count)): 
-                if((data.ranges[i + min_angle_index] < OUTER_RANGE_RADIUS) && debounce < 5):
+                if(data.ranges[i + min_angle_index] < OUTER_RANGE_RADIUS and debounce < 5):
                     print(data.ranges[i + min_angle_index])
-                    angle = get_angle((i * data.angle_increment) + min_angle)
-                    print(angle)
-                    box.append(angle)
+                    print(get_angle((i * data.angle_increment) + min_angle))
+                    box.append(get_angle((i * data.angle_increment) + min_angle))
                     
-                    if(len(box)>= 180):
-                        #seeing_box = !seeing_box # I think this stops lidar
-                        midAngle = statistics.median(box)
+                    if(len(box)>= 50 and debounce < 5):
+                        index = len(box) // 2 
+                        midAngle =  get_angle((index * data.angle_increment) + min_angle)
                         print("The angle needed is: " + midAngle)
-                        break
                         
                     continue
                     
-                if(data.ranges[(i-1) + min_angle_index] < OUTER_RANGE_RADIUS):
+                elif(data.ranges[(i-1) + min_angle_index] < OUTER_RANGE_RADIUS and debounce < 5):
                     debounce += 1
+                    
+                else:
+                    debounce = 0
                 
                 
                 #if(debounce >= 3)

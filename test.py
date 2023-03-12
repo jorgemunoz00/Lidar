@@ -88,8 +88,9 @@ else:
             for i in range(int(scan_count)): 
                 if((data.ranges[i + min_angle_index] < OUTER_RANGE_RADIUS) && debounce < 5):
                     print(data.ranges[i + min_angle_index])
-                    print(get_angle((i * data.angle_increment) + min_angle))
-                    box.append(data.ranges[i + min_angle_index])
+                    angle = get_angle((i * data.angle_increment) + min_angle)
+                    print(angle)
+                    box.append(angle)
                     
                     if(len(box)>= 180):
                         #seeing_box = !seeing_box # I think this stops lidar
